@@ -1,0 +1,562 @@
+<title>Cyber Suraksha Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Mukta:wght@400;500;700&display=swap">
+<style>
+/* Layout: one-column phone app, sticky title bar, content cards styled as the real channel (SMS / WhatsApp / call / e-mail), fixed bottom tab bar */
+:root{
+  --bg:#F3F5F9; --surface:#FFFFFF; --ink:#16243A; --muted:#5B6A80; --line:#D9DFE8;
+  --navy:#1F3A5F; --saffron:#E46C0A; --saffron-soft:#FCE9DA;
+  --scam:#C62828; --scam-soft:#FDE7E7; --safe:#2E7D32; --safe-soft:#E3F2E4;
+  --sms:#E9EDF3; --wa:#DCF3D9; --wa-head:#2C6B4F; --call:#1B2638; --call-ink:#EAF0F8;
+  --on-navy:#FFFFFF;
+  --f-display:"Baloo 2","Mukta",system-ui,sans-serif;
+  --f-body:"Mukta","Noto Sans Devanagari",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1622; --surface:#18212F; --ink:#E7ECF3; --muted:#9AA8BC; --line:#2A3547;
+  --navy:#1A2D47; --saffron:#F08A3A; --saffron-soft:#3A2717;
+  --scam:#FF7B7B; --scam-soft:#3A1C1F; --safe:#7FCB84; --safe-soft:#18301B;
+  --sms:#222D3E; --wa:#1E3A2B; --wa-head:#6FC29B; --call:#0B111B; --call-ink:#EAF0F8; --on-navy:#FFFFFF; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1622; --surface:#18212F; --ink:#E7ECF3; --muted:#9AA8BC; --line:#2A3547;
+  --navy:#1A2D47; --saffron:#F08A3A; --saffron-soft:#3A2717;
+  --scam:#FF7B7B; --scam-soft:#3A1C1F; --safe:#7FCB84; --safe-soft:#18301B;
+  --sms:#222D3E; --wa:#1E3A2B; --wa-head:#6FC29B; --call:#0B111B; --call-ink:#EAF0F8; --on-navy:#FFFFFF; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;margin:0}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--saffron);outline-offset:2px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--navy);color:var(--on-navy);padding:10px 16px}
+.top-in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.brand{flex:1;min-width:0}
+.brand b{font-family:var(--f-display);font-size:1.25rem;line-height:1.1;display:block;letter-spacing:.2px}
+.brand small{opacity:.85;font-size:.78rem}
+.lang{display:flex;border:1px solid rgba(255,255,255,.45);border-radius:20px;overflow:hidden;flex:none}
+.lang button{background:transparent;color:var(--on-navy);border:0;padding:4px 12px;font-size:.85rem}
+.lang button[aria-pressed="true"]{background:var(--saffron);color:#fff}
+main{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:16px 110px}
+h1{font-family:var(--f-display);font-size:1.6rem;line-height:1.15;margin:0 0 4px;text-wrap:balance}
+h2{font-family:var(--f-display);font-size:1.2rem;margin:0 0 8px;text-wrap:balance}
+.lede{color:var(--muted);margin:0 0 14px}
+.panel{display:flex;flex-direction:column;gap:14px}
+.meter{display:flex;align-items:center;gap:10px;font-variant-numeric:tabular-nums;font-size:.9rem;color:var(--muted)}
+.bar{flex:1;height:8px;background:var(--line);border-radius:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--saffron);width:0;transition:width .3s}
+.chip{display:inline-block;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--saffron);background:var(--saffron-soft);padding:2px 8px;border-radius:10px}
+/* message renderings */
+.msg{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--surface)}
+.msg .hd{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:.88rem;border-bottom:1px solid var(--line)}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.8rem;flex:none;background:var(--line);color:var(--ink)}
+.hd .who{min-width:0}
+.hd .who b{display:block;overflow-wrap:anywhere}
+.hd .who span{color:var(--muted);font-size:.78rem}
+.bd{padding:14px}
+.bubble{background:var(--sms);border-radius:4px 16px 16px 16px;padding:10px 12px;max-width:94%;overflow-wrap:anywhere;white-space:pre-line}
+.msg.wa .hd{background:var(--wa-head);color:#fff;border:0}
+.msg.wa .hd .who span{color:rgba(255,255,255,.85)}
+.msg.wa .bd{background:repeating-linear-gradient(45deg,transparent 0 10px,rgba(127,127,127,.05) 10px 20px)}
+.msg.wa .bubble{background:var(--wa)}
+.att{margin-top:8px;display:flex;gap:8px;align-items:center;background:var(--surface);border:1px dashed var(--muted);border-radius:10px;padding:8px 10px;font-size:.85rem;overflow-wrap:anywhere}
+.att .ext{font-weight:700;color:var(--scam);flex:none}
+.msg.call{background:var(--call);color:var(--call-ink);border:0}
+.msg.call .hd{border:0;justify-content:center;flex-direction:column;text-align:center;padding-top:18px}
+.msg.call .hd .who span{color:#9FB0C7}
+.msg.call .av{width:56px;height:56px;font-size:1.1rem;background:#2C3B54;color:#fff}
+.msg.call .bubble{background:#25324A;color:var(--call-ink);border-radius:12px}
+.callbtns{display:flex;justify-content:center;gap:40px;padding:4px 0 16px}
+.callbtns span{width:42px;height:42px;border-radius:50%;display:block}
+.callbtns .r{background:#D93A3A}.callbtns .g{background:#2FA35A}
+.msg.mail .hd{flex-direction:column;align-items:flex-start;gap:2px}
+.msg.mail .hd div{overflow-wrap:anywhere}
+.msg.mail .bubble{background:transparent;padding:0;max-width:100%}
+.lbl{color:var(--muted);font-size:.78rem}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{border:2px solid transparent;border-radius:14px;padding:12px;font-weight:700;font-size:1rem}
+.btn-scam{background:var(--scam-soft);color:var(--scam);border-color:var(--scam)}
+.btn-safe{background:var(--safe-soft);color:var(--safe);border-color:var(--safe)}
+.btn-main{background:var(--saffron);color:#fff;width:100%}
+.btn-ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:default}
+.verdict{border-radius:14px;padding:14px;border:1px solid var(--line);background:var(--surface)}
+.verdict.ok{border-left:6px solid var(--safe)}
+.verdict.no{border-left:6px solid var(--scam)}
+.verdict h3{margin:0 0 6px;font-family:var(--f-display);font-size:1.1rem}
+.verdict ul{margin:6px 0 8px;padding-left:20px}
+.verdict p{margin:0}
+.tag{font-weight:700}
+.tag.scam{color:var(--scam)}.tag.safe{color:var(--safe)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-family:ui-monospace,"SFMono-Regular",Menlo,monospace;font-size:.9rem;overflow-wrap:anywhere;color:var(--ink)}
+.opt.right{border-color:var(--safe);background:var(--safe-soft)}
+.opt.wrong{border-color:var(--scam);background:var(--scam-soft)}
+input[type=text],input[type=password]{width:100%;font:inherit;padding:12px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink)}
+.strength{height:10px;border-radius:10px;background:var(--line);overflow:hidden}
+.strength i{display:block;height:100%;width:0;transition:width .25s,background .25s}
+.row{display:flex;gap:10px;align-items:flex-start}
+.check{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:0}
+.check input{width:22px;height:22px;margin-top:2px;accent-color:var(--safe);flex:none}
+.big{font-family:var(--f-display);font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start}
+.steps li::before{content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+.hotline{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--scam-soft);border:2px solid var(--scam);border-radius:14px;padding:12px 14px}
+.hotline .num{font-family:var(--f-display);font-size:2rem;color:var(--scam);line-height:1}
+.copy{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:6px 10px;font-size:.85rem}
+a{color:var(--saffron)}
+.contact{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.pledge{background:var(--navy);color:#fff;border-radius:16px;padding:16px}
+.pledge p{margin:0 0 12px}
+.done-msg{font-weight:700}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs-in{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+.tabs button{background:none;border:0;padding:8px 2px 10px;color:var(--muted);font-size:.72rem;line-height:1.2;display:flex;flex-direction:column;align-items:center;gap:3px;border-top:3px solid transparent}
+.tabs button[aria-selected="true"]{color:var(--saffron);border-top-color:var(--saffron);font-weight:700}
+.tabs svg{width:22px;height:22px}
+.foot{color:var(--muted);font-size:.8rem;text-align:center;margin-top:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><b data-t="appName"></b><small data-t="appSub"></small></div>
+    <div class="lang" role="group" aria-label="Language">
+      <button id="lang-hi" type="button" aria-pressed="false">हिंदी</button>
+      <button id="lang-en" type="button" aria-pressed="true">EN</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- 1. SPOT THE SCAM -->
+  <section id="p-scam" class="panel" data-panel>
+    <div>
+      <span class="chip" data-t="act1"></span>
+      <h1 data-t="scamTitle"></h1>
+      <p class="lede" data-t="scamLede"></p>
+    </div>
+    <div class="meter"><span id="q-pos"></span><div class="bar"><i id="q-bar"></i></div><span id="q-score"></span></div>
+    <div id="q-card"></div>
+    <div class="choices" id="q-choices">
+      <button class="btn btn-scam" id="b-scam" type="button" data-t="isScam"></button>
+      <button class="btn btn-safe" id="b-safe" type="button" data-t="isSafe"></button>
+    </div>
+    <div id="q-verdict"></div>
+    <button class="btn btn-main" id="q-next" type="button" hidden></button>
+  </section>
+
+  <!-- 2. LINK DETECTIVE -->
+  <section id="p-link" class="panel" data-panel hidden>
+    <div>
+      <span class="chip" data-t="act2"></span>
+      <h1 data-t="linkTitle"></h1>
+      <p class="lede" data-t="linkLede"></p>
+    </div>
+    <div class="card"><b data-t="ruleHead"></b><p style="margin:4px 0 0" data-t="ruleBody"></p></div>
+    <div class="meter"><span id="l-pos"></span><div class="bar"><i id="l-bar"></i></div><span id="l-score"></span></div>
+    <div class="card"><h2 id="l-q"></h2><div class="opts" id="l-opts"></div></div>
+    <div id="l-verdict"></div>
+    <button class="btn btn-main" id="l-next" type="button" hidden></button>
+  </section>
+
+  <!-- 3. PASSWORD -->
+  <section id="p-pass" class="panel" data-panel hidden>
+    <div>
+      <span class="chip" data-t="act3"></span>
+      <h1 data-t="passTitle"></h1>
+      <p class="lede" data-t="passLede"></p>
+    </div>
+    <div class="card panel">
+      <label for="pw" class="lbl" data-t="passLabel"></label>
+      <input id="pw" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" value="Ndri@123">
+      <div class="strength"><i id="pw-bar"></i></div>
+      <div><b id="pw-label"></b> <span class="lbl" id="pw-time"></span></div>
+      <ul id="pw-tips" style="margin:0;padding-left:20px"></ul>
+    </div>
+    <div class="card"><b data-t="passIdeaHead"></b><p style="margin:4px 0 0" data-t="passIdea"></p></div>
+  </section>
+
+  <!-- 4. CHECK-UP -->
+  <section id="p-check" class="panel" data-panel hidden>
+    <div>
+      <span class="chip" data-t="act4"></span>
+      <h1 data-t="checkTitle"></h1>
+      <p class="lede" data-t="checkLede"></p>
+    </div>
+    <div class="card row" style="align-items:center">
+      <div class="big"><span id="c-score">0</span><span style="font-size:1.2rem;color:var(--muted)">/<span id="c-total"></span></span></div>
+      <div id="c-msg" style="min-width:0"></div>
+    </div>
+    <div class="card" id="c-list"></div>
+  </section>
+
+  <!-- 5. HELP -->
+  <section id="p-help" class="panel" data-panel hidden>
+    <div>
+      <span class="chip" data-t="act5"></span>
+      <h1 data-t="helpTitle"></h1>
+      <p class="lede" data-t="helpLede"></p>
+    </div>
+    <div class="hotline">
+      <div><div class="lbl" data-t="hotLbl"></div><div class="num" id="num1930">1930</div></div>
+      <button class="copy" type="button" data-copy="1930" data-t="copy"></button>
+    </div>
+    <div class="card"><ol class="steps" id="h-steps"></ol></div>
+    <div class="card">
+      <h2 data-t="ndriHead"></h2>
+      <div class="contact"><span data-t="phone"></span>: <b>0184-2259013</b></div>
+      <div class="contact"><span data-t="email"></span>: <b>Vivek.kumar3@icar.org.in</b> <button class="copy" type="button" data-copy="Vivek.kumar3@icar.org.in" data-t="copy"></button></div>
+    </div>
+    <div class="card">
+      <h2 data-t="rulesHead"></h2>
+      <ol class="steps" id="h-rules"></ol>
+    </div>
+    <div class="pledge">
+      <h2 data-t="pledgeHead"></h2>
+      <p data-t="pledgeText"></p>
+      <button class="btn btn-main" id="pledge-btn" type="button" data-t="pledgeBtn"></button>
+      <p class="done-msg" id="pledge-done" hidden data-t="pledgeDone" style="margin-top:12px"></p>
+    </div>
+    <p class="foot" data-t="foot"></p>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="tabs-in" role="tablist">
+    <button role="tab" data-tab="p-scam" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11H8l-4 4z"/><path d="M12 8v3M12 13.5v.5"/></svg><span data-t="tab1"></span></button>
+    <button role="tab" data-tab="p-link" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span data-t="tab2"></span></button>
+    <button role="tab" data-tab="p-pass" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span data-t="tab3"></span></button>
+    <button role="tab" data-tab="p-check" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span data-t="tab4"></span></button>
+    <button role="tab" data-tab="p-help" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><span data-t="tab5"></span></button>
+  </div>
+</nav>
+
+<script>
+const T={
+en:{appName:"Cyber Suraksha Challenge",appSub:"ICAR-NDRI Karnal · NCSAM October 2026",
+ tab1:"Spot Scam",tab2:"Links",tab3:"Password",tab4:"Check-up",tab5:"Help",
+ act1:"Activity 1",scamTitle:"Spot the Scam",scamLede:"These messages are modelled on frauds happening in India right now. Read each one and decide: scam or safe?",
+ isScam:"Scam",isSafe:"Safe",next:"Next message",finish:"See my score",restart:"Play again",
+ correct:"Correct!",wrong:"Not quite.",itWas:"This was",scamW:"a SCAM",safeW:"SAFE",flagsScam:"Red flags",flagsSafe:"Why it looks genuine",doThis:"What to do",
+ of:"of",score:"Score",
+ resultHead:"You scored",resultHi:"Excellent! You are a Cyber Prahari. Share this challenge with your family.",resultMid:"Good effort. Read the red flags again; scammers rely on hurry and fear.",resultLo:"Scammers would find you an easy target. Go through the red flags and play again.",
+ act2:"Activity 2",linkTitle:"Link Detective",linkLede:"Fraud sites copy the look of real ones. Pick the genuine web address.",
+ ruleHead:"The rule",ruleBody:"Look at the part just before the first single “/”. Read it from the right. A government site ends in .gov.in, and nothing comes after it. “incometax.gov.in.refund-claim.com” is really refund-claim.com.",
+ linkRight:"Right. That is the official address.",linkWrong:"That is a look-alike. The genuine one is highlighted in green.",
+ act3:"Activity 3",passTitle:"Password Strength Lab",passLede:"Type a password like the ones you use. Nothing you type leaves this phone, but do not type your real password.",
+ passLabel:"Try a password",passIdeaHead:"Use a passphrase",passIdea:"Join 3–4 unrelated words with a number and symbol, e.g. Gaay-Neem-Baadal-74! It is long, easy to remember and hard to crack. Use a different one for e-mail and banking, and switch on MFA.",
+ pwVeryWeak:"Very weak",pwWeak:"Weak",pwFair:"Fair",pwStrong:"Strong",pwVeryStrong:"Very strong",
+ pwT0:"cracked instantly",pwT1:"cracked in minutes",pwT2:"cracked in days",pwT3:"would take years",pwT4:"would take centuries",
+ tipLen:"Make it at least 12 characters.",tipMix:"Mix capital letters, numbers and symbols.",tipCommon:"Avoid common words like password, 123, ndri, india, your name or birth year.",tipRepeat:"Avoid repeated or sequential characters (aaa, 1234, qwerty).",tipGood:"Good. Keep it unique to one account and turn on MFA.",
+ act4:"Activity 4",checkTitle:"My Cyber Hygiene Check-up",checkLede:"Tick each habit you already follow. Fix the unticked ones today.",
+ cHi:"Excellent hygiene. Help a colleague do the same.",cMid:"Good start. Fix the unticked items this week.",cLo:"Your phone and accounts are at risk. Start with screen lock, WhatsApp two-step verification and turning off unknown apps.",
+ act5:"Activity 5",helpTitle:"Cheated? Act in the golden hour",helpLede:"The faster you report, the better the chance of freezing the money.",
+ hotLbl:"National Cyber Fraud Helpline",copy:"Copy",copied:"Copied",
+ ndriHead:"NDRI Cyber Security Cell",phone:"Phone",email:"E-mail",
+ rulesHead:"Five golden rules",pledgeHead:"Cyber Hygiene Pledge",
+ pledgeText:"I will use strong passwords and MFA, keep my devices updated, never share OTP or PIN, think before I click, and report every cyber incident promptly. I will help build a culture of cyber hygiene at home and at work.",
+ pledgeBtn:"I take the pledge",pledgeDone:"Thank you! Show this screen to the facilitator. #CyberHygieneOurCulture",
+ foot:"Awareness activity by the Cyber Security Cell, ICAR-NDRI Karnal. Messages shown are training examples."},
+hi:{appName:"साइबर सुरक्षा चैलेंज",appSub:"भा.कृ.अनु.प.-रा.डे.अनु.सं. करनाल · साइबर सुरक्षा जागरूकता माह अक्टूबर 2026",
+ tab1:"ठगी पहचानें",tab2:"लिंक",tab3:"पासवर्ड",tab4:"जाँच",tab5:"सहायता",
+ act1:"गतिविधि 1",scamTitle:"ठगी पहचानें",scamLede:"ये संदेश भारत में इन दिनों हो रही वास्तविक ठगियों पर आधारित हैं। हर संदेश पढ़ें और तय करें: ठगी या सुरक्षित?",
+ isScam:"ठगी",isSafe:"सुरक्षित",next:"अगला संदेश",finish:"मेरा स्कोर देखें",restart:"फिर से खेलें",
+ correct:"सही!",wrong:"सही नहीं।",itWas:"यह था",scamW:"ठगी",safeW:"सुरक्षित",flagsScam:"खतरे के संकेत",flagsSafe:"यह असली क्यों लगता है",doThis:"क्या करें",
+ of:"में से",score:"स्कोर",
+ resultHead:"आपका स्कोर",resultHi:"शानदार! आप साइबर प्रहरी हैं। यह चैलेंज अपने परिवार के साथ साझा करें।",resultMid:"अच्छा प्रयास। खतरे के संकेत फिर से पढ़ें; ठग जल्दबाज़ी और डर का सहारा लेते हैं।",resultLo:"ठगों के लिए आप आसान निशाना हो सकते हैं। खतरे के संकेत पढ़ें और फिर से खेलें।",
+ act2:"गतिविधि 2",linkTitle:"लिंक जासूस",linkLede:"नकली वेबसाइटें असली जैसी दिखती हैं। असली वेब पता चुनें।",
+ ruleHead:"नियम",ruleBody:"पहले अकेले “/” से ठीक पहले वाले भाग को देखें और दाईं ओर से पढ़ें। सरकारी साइट .gov.in पर समाप्त होती है और उसके बाद कुछ नहीं होता। “incometax.gov.in.refund-claim.com” असल में refund-claim.com है।",
+ linkRight:"सही। यही आधिकारिक पता है।",linkWrong:"यह नकली पता है। असली पता हरे रंग में दिखाया गया है।",
+ act3:"गतिविधि 3",passTitle:"पासवर्ड मज़बूती जाँच",passLede:"अपने जैसा कोई पासवर्ड लिखें। यहाँ लिखा कुछ भी फ़ोन से बाहर नहीं जाता, फिर भी अपना असली पासवर्ड न लिखें।",
+ passLabel:"पासवर्ड लिखकर देखें",passIdeaHead:"पासफ़्रेज़ का प्रयोग करें",passIdea:"3–4 असंबंधित शब्दों को अंक और चिह्न के साथ जोड़ें, जैसे Gaay-Neem-Baadal-74! यह लंबा, याद रखने में आसान और तोड़ने में कठिन है। ई-मेल और बैंकिंग के लिए अलग-अलग पासवर्ड रखें और MFA चालू करें।",
+ pwVeryWeak:"बहुत कमज़ोर",pwWeak:"कमज़ोर",pwFair:"ठीक-ठाक",pwStrong:"मज़बूत",pwVeryStrong:"बहुत मज़बूत",
+ pwT0:"तुरंत टूट जाएगा",pwT1:"कुछ मिनटों में टूट जाएगा",pwT2:"कुछ दिनों में टूट जाएगा",pwT3:"तोड़ने में वर्षों लगेंगे",pwT4:"तोड़ने में सदियाँ लगेंगी",
+ tipLen:"कम से कम 12 अक्षर रखें।",tipMix:"बड़े अक्षर, अंक और चिह्न मिलाएँ।",tipCommon:"password, 123, ndri, india, अपना नाम या जन्म वर्ष जैसे सामान्य शब्द न रखें।",tipRepeat:"दोहराए गए या क्रमवार अक्षर (aaa, 1234, qwerty) न रखें।",tipGood:"बढ़िया। इसे केवल एक खाते के लिए रखें और MFA चालू करें।",
+ act4:"गतिविधि 4",checkTitle:"मेरी साइबर स्वच्छता जाँच",checkLede:"जिन आदतों का आप पहले से पालन करते हैं, उन पर टिक करें। बाकी आज ही ठीक करें।",
+ cHi:"उत्कृष्ट स्वच्छता। किसी सहकर्मी की भी मदद करें।",cMid:"अच्छी शुरुआत। बचे हुए बिंदु इस सप्ताह ठीक करें।",cLo:"आपका फ़ोन और खाते खतरे में हैं। स्क्रीन लॉक, व्हाट्सऐप टू-स्टेप वेरिफ़िकेशन और अज्ञात ऐप्स बंद करने से शुरुआत करें।",
+ act5:"गतिविधि 5",helpTitle:"ठगी हुई? गोल्डन ऑवर में कार्रवाई करें",helpLede:"जितनी जल्दी सूचना देंगे, पैसा रुकवाने की संभावना उतनी अधिक होगी।",
+ hotLbl:"राष्ट्रीय साइबर धोखाधड़ी हेल्पलाइन",copy:"कॉपी",copied:"कॉपी हुआ",
+ ndriHead:"रा.डे.अनु.सं. साइबर सुरक्षा प्रकोष्ठ",phone:"फ़ोन",email:"ई-मेल",
+ rulesHead:"पाँच सुनहरे नियम",pledgeHead:"साइबर स्वच्छता शपथ",
+ pledgeText:"मैं मज़बूत पासवर्ड और MFA का प्रयोग करूँगा/करूँगी, अपने उपकरण अपडेट रखूँगा/रखूँगी, OTP या PIN कभी साझा नहीं करूँगा/करूँगी, क्लिक करने से पहले सोचूँगा/सोचूँगी और हर साइबर घटना की तुरंत सूचना दूँगा/दूँगी। मैं घर और कार्यस्थल पर साइबर स्वच्छता की संस्कृति बनाने में सहयोग करूँगा/करूँगी।",
+ pledgeBtn:"मैं शपथ लेता/लेती हूँ",pledgeDone:"धन्यवाद! यह स्क्रीन प्रशिक्षक को दिखाएँ। #CyberHygieneOurCulture",
+ foot:"साइबर सुरक्षा प्रकोष्ठ, भा.कृ.अनु.प.-रा.डे.अनु.सं. करनाल द्वारा जागरूकता गतिविधि। दिखाए गए संदेश प्रशिक्षण उदाहरण हैं।"}
+};
+
+// Scenarios: ch = sms | wa | call | mail
+const Q=[
+{ch:"sms",av:"98",from:{en:"+91 98xxxx4521",hi:"+91 98xxxx4521"},sub:{en:"Text message",hi:"एसएमएस"},
+ body:{en:"Dear Consumer, your electricity power will be disconnected tonight at 9:30 PM because your previous month bill was not updated. Please immediately contact our Electricity Officer 98xxxx4521. Thank you.",
+       hi:"प्रिय उपभोक्ता, पिछले महीने का बिल अपडेट न होने के कारण आज रात 9:30 बजे आपकी बिजली काट दी जाएगी। तुरंत हमारे बिजली अधिकारी से 98xxxx4521 पर संपर्क करें। धन्यवाद।"},
+ ans:"scam",
+ flags:{en:["Sent from a personal mobile number, not the electricity board","Threat with a deadline: “tonight 9:30 PM”","Asks you to call a private number"],
+        hi:["बिजली बोर्ड नहीं, निजी मोबाइल नंबर से भेजा गया","समय-सीमा के साथ धमकी: “आज रात 9:30 बजे”","निजी नंबर पर कॉल करने को कहा गया"]},
+ tip:{en:"The “officer” asks you to install a support app or pay ₹10 online, then empties your account. Check bills only on the official app or website, or at the office.",
+      hi:"“अधिकारी” आपसे सपोर्ट ऐप इंस्टॉल करवाता है या ₹10 ऑनलाइन भुगतान करवाता है और फिर खाता खाली कर देता है। बिल केवल आधिकारिक ऐप, वेबसाइट या कार्यालय में जाँचें।"}},
+{ch:"wa",av:"7x",from:{en:"+91 7xxxxxx903",hi:"+91 7xxxxxx903"},sub:{en:"Not in your contacts",hi:"आपके संपर्कों में नहीं"},
+ body:{en:"Namaste ji 🙏 You are cordially invited to my daughter's wedding. Please see the card.",hi:"नमस्ते जी 🙏 मेरी बेटी की शादी में आप सादर आमंत्रित हैं। कृपया कार्ड देखें।"},
+ att:{name:"Shaadi_Card_2026.apk",size:"6.2 MB",ext:"APK"},ans:"scam",
+ flags:{en:["The “card” is an .apk file, which is an app, not a photo or PDF","Unknown number","Once installed, it can read your SMS and OTPs and forward them to criminals"],
+        hi:["“कार्ड” एक .apk फ़ाइल है, यानी ऐप, फ़ोटो या PDF नहीं","अज्ञात नंबर","इंस्टॉल होने पर यह आपके SMS और OTP पढ़कर ठगों को भेज सकता है"]},
+ tip:{en:"Never open .apk files from WhatsApp or SMS, even from known contacts, because their phone may be hacked. Keep “Install unknown apps” switched off.",
+      hi:"व्हाट्सऐप या SMS से आई .apk फ़ाइल कभी न खोलें, परिचितों से आई हो तब भी, क्योंकि उनका फ़ोन हैक हो सकता है। “अज्ञात ऐप्स इंस्टॉल करें” विकल्प बंद रखें।"}},
+{ch:"sms",av:"BK",from:{en:"JD-XYZBNK",hi:"JD-XYZBNK"},sub:{en:"Bank sender ID",hi:"बैंक सेंडर आईडी"},
+ body:{en:"Rs.2,500.00 debited from A/c XX1234 on 08-10-26 at KARNAL MEDICAL STORE. Not you? Call the number printed on the back of your card.",
+       hi:"खाता XX1234 से 08-10-26 को KARNAL MEDICAL STORE पर ₹2,500.00 डेबिट हुए। यह आपने नहीं किया? अपने कार्ड के पीछे छपे नंबर पर कॉल करें।"},
+ ans:"safe",
+ flags:{en:["Official bank sender ID, not a 10-digit mobile number","No link, and no request for OTP or PIN","Points you to the number on your own card"],
+        hi:["10 अंकों का मोबाइल नंबर नहीं, बैंक की आधिकारिक सेंडर आईडी","कोई लिंक नहीं, OTP या PIN की माँग नहीं","आपके अपने कार्ड पर छपे नंबर पर कॉल करने को कहा गया"]},
+ tip:{en:"Genuine alerts inform you; they do not ask for anything. If you did not make this payment, call the number on your card or 1930 at once.",
+      hi:"असली अलर्ट केवल सूचना देते हैं, कुछ माँगते नहीं। यदि यह भुगतान आपने नहीं किया, तो तुरंत कार्ड पर छपे नंबर या 1930 पर कॉल करें।"}},
+{ch:"call",av:"CBI",from:{en:"“Mumbai Police / CBI Officer”",hi:"“मुंबई पुलिस / सीबीआई अधिकारी”"},sub:{en:"WhatsApp video call · officer in uniform",hi:"व्हाट्सऐप वीडियो कॉल · वर्दी में अधिकारी"},
+ body:{en:"“A parcel in your name with drugs and fake passports has been seized. Your Aadhaar is linked to money laundering. You are under DIGITAL ARREST. Do not disconnect and do not tell anyone. Transfer your savings to this RBI verification account. It will be returned after the inquiry.”",
+       hi:"“आपके नाम के पार्सल में ड्रग्स और नकली पासपोर्ट ज़ब्त हुए हैं। आपका आधार मनी लॉन्ड्रिंग से जुड़ा है। आप डिजिटल अरेस्ट में हैं। कॉल न काटें और किसी को न बताएँ। अपनी जमा-पूँजी इस RBI सत्यापन खाते में भेजें। जाँच के बाद लौटा दी जाएगी।”"},
+ ans:"scam",
+ flags:{en:["There is no “digital arrest” in Indian law","Police and CBI never question people or demand money on video calls","Isolation: “don't disconnect, don't tell anyone”"],
+        hi:["भारतीय कानून में “डिजिटल अरेस्ट” जैसा कुछ नहीं है","पुलिस या सीबीआई वीडियो कॉल पर पूछताछ नहीं करती और पैसे नहीं माँगती","अकेला करना: “कॉल न काटें, किसी को न बताएँ”"]},
+ tip:{en:"Disconnect immediately, tell your family, and call 1930. Real agencies send written notices and never ask you to transfer money.",
+      hi:"तुरंत कॉल काटें, परिवार को बताएँ और 1930 पर कॉल करें। असली एजेंसियाँ लिखित नोटिस भेजती हैं और कभी पैसे ट्रांसफ़र करने को नहीं कहतीं।"}},
+{ch:"wa",av:"AO",from:{en:"“Capt. Sharma (Buyer)”",hi:"“कैप्टन शर्मा (खरीदार)”"},sub:{en:"From an online marketplace ad",hi:"ऑनलाइन बिक्री विज्ञापन से"},
+ body:{en:"Sir I am Army officer posted in cantt, I will buy your scooter for ₹45,000. I am sending advance now. Scan this QR code and enter your UPI PIN to RECEIVE ₹5,000.",
+       hi:"सर मैं छावनी में तैनात आर्मी अफ़सर हूँ, आपका स्कूटर ₹45,000 में लूँगा। अभी एडवांस भेज रहा हूँ। ₹5,000 प्राप्त करने के लिए यह QR कोड स्कैन करें और UPI PIN डालें।"},
+ att:{name:"QR_code_receive_payment.jpg",size:"84 KB",ext:"QR"},ans:"scam",
+ flags:{en:["You never need a PIN or QR scan to RECEIVE money","A fake “army officer” story to win trust","Rushes you before you think"],
+        hi:["पैसा प्राप्त करने के लिए PIN या QR स्कैन की कभी ज़रूरत नहीं होती","भरोसा जीतने के लिए नकली “आर्मी अफ़सर” की कहानी","सोचने से पहले जल्दबाज़ी करवाना"]},
+ tip:{en:"UPI PIN is only for SENDING money. Scanning a QR and entering your PIN always takes money out of your account.",
+      hi:"UPI PIN केवल पैसा भेजने के लिए है। QR स्कैन करके PIN डालने से पैसा हमेशा आपके खाते से निकलता है।"}},
+{ch:"sms",av:"63",from:{en:"+91 63xxxxxx18",hi:"+91 63xxxxxx18"},sub:{en:"Text message",hi:"एसएमएस"},
+ body:{en:"Dear customer your Bank KYC has expired. Your account will be BLOCKED in 24 hours. Update PAN/KYC now: http://kyc-update-bank.in/verify",
+       hi:"प्रिय ग्राहक, आपका बैंक KYC समाप्त हो गया है। 24 घंटे में आपका खाता बंद कर दिया जाएगा। अभी PAN/KYC अपडेट करें: http://kyc-update-bank.in/verify"},
+ ans:"scam",
+ flags:{en:["The link is not your bank's official website","Threat to block the account within 24 hours","Banks never ask for KYC updates through SMS links"],
+        hi:["लिंक आपके बैंक की आधिकारिक वेबसाइट नहीं है","24 घंटे में खाता बंद करने की धमकी","बैंक कभी SMS लिंक से KYC अपडेट नहीं करवाते"]},
+ tip:{en:"Update KYC only at your branch or in your bank's official app. Never enter card details, PIN or OTP on a link that came by SMS.",
+      hi:"KYC केवल शाखा में या बैंक के आधिकारिक ऐप में अपडेट करें। SMS से आए लिंक पर कार्ड विवरण, PIN या OTP कभी न डालें।"}},
+{ch:"wa",av:"HR",from:{en:"“Priya – HR, Digital Marketing”",hi:"“प्रिया – एचआर, डिजिटल मार्केटिंग”"},sub:{en:"Not in your contacts",hi:"आपके संपर्कों में नहीं"},
+ body:{en:"Part-time job! Earn ₹3,000–8,000 per day from home. Just like YouTube videos and rate hotels. ₹150 paid instantly for the first 3 tasks. Join our Telegram group now 👇",
+       hi:"पार्ट-टाइम जॉब! घर बैठे रोज़ ₹3,000–8,000 कमाएँ। बस यूट्यूब वीडियो लाइक करें और होटल को रेटिंग दें। पहले 3 टास्क के ₹150 तुरंत मिलेंगे। अभी हमारे टेलीग्राम ग्रुप से जुड़ें 👇"},
+ ans:"scam",
+ flags:{en:["Easy money for liking videos","A small first payment to win trust","Contact only through Telegram or WhatsApp"],
+        hi:["वीडियो लाइक करने के बदले आसान कमाई","भरोसा जीतने के लिए पहले छोटा भुगतान","संपर्क केवल टेलीग्राम या व्हाट्सऐप पर"]},
+ tip:{en:"After a few small payouts you are asked to pay for “prepaid tasks” and lose lakhs. A real employer never asks you to pay.",
+      hi:"कुछ छोटे भुगतानों के बाद “प्रीपेड टास्क” के लिए पैसे जमा करवाए जाते हैं और लोग लाखों गँवा देते हैं। असली नियोक्ता कभी पैसे नहीं माँगता।"}},
+{ch:"mail",av:"CC",from:{en:"Cyber Security Cell, NDRI",hi:"साइबर सुरक्षा प्रकोष्ठ, रा.डे.अनु.सं."},sub:{en:"Official ICAR e-mail address",hi:"आधिकारिक आईसीएआर ई-मेल पता"},
+ subject:{en:"Reminder: Cyber Hygiene Workshop, 23 October",hi:"स्मरण: साइबर स्वच्छता कार्यशाला, 23 अक्टूबर"},
+ body:{en:"Dear colleagues,\nThe Cyber Hygiene Workshop will be held on 23 October at 10:30 AM in the Auditorium. No registration or login is needed. Please attend.",
+       hi:"प्रिय सहकर्मियो,\nसाइबर स्वच्छता कार्यशाला 23 अक्टूबर को प्रातः 10:30 बजे सभागार में आयोजित होगी। किसी पंजीकरण या लॉगिन की आवश्यकता नहीं है। कृपया उपस्थित हों।"},
+ ans:"safe",
+ flags:{en:["Comes from the institute's official address","No link, no attachment, no login","Matches the circular already issued"],
+        hi:["संस्थान के आधिकारिक पते से आया है","कोई लिंक, अटैचमेंट या लॉगिन नहीं","पहले जारी परिपत्र से मेल खाता है"]},
+ tip:{en:"Genuine official mails agree with circulars and never ask for your password. When in doubt, call the sender.",
+      hi:"असली आधिकारिक ई-मेल परिपत्रों से मेल खाते हैं और कभी पासवर्ड नहीं माँगते। संदेह हो तो भेजने वाले को फ़ोन करें।"}},
+{ch:"mail",av:"D",from:{en:"Director NDRI <director.ndri.office@gmail.com>",hi:"Director NDRI <director.ndri.office@gmail.com>"},sub:{en:"To: you",hi:"प्रति: आप"},
+ subject:{en:"Urgent and confidential",hi:"अत्यावश्यक एवं गोपनीय"},
+ body:{en:"I am in a meeting and cannot talk. I need you to buy 5 gift cards of ₹10,000 each for a guest right now and reply with the codes. Keep this confidential. I will reimburse you.",
+       hi:"मैं बैठक में हूँ और बात नहीं कर सकता। अभी एक अतिथि के लिए ₹10,000 के 5 गिफ़्ट कार्ड खरीदकर उनके कोड जवाब में भेजें। यह बात गोपनीय रखें। राशि मैं लौटा दूँगा।"},
+ ans:"scam",
+ flags:{en:["Official request from a Gmail address, not @icar.org.in or @icar.gov.in","Urgent, secret, and “cannot talk”","Gift cards: money that cannot be traced"],
+        hi:["आधिकारिक अनुरोध Gmail पते से, @icar.org.in या @icar.gov.in से नहीं","अत्यावश्यक, गोपनीय और “बात नहीं कर सकता”","गिफ़्ट कार्ड: ऐसा पैसा जिसका पता नहीं लगाया जा सकता"]},
+ tip:{en:"Verify any money request from a senior by phone or in person. Forward the mail to the Cyber Security Cell.",
+      hi:"किसी वरिष्ठ के नाम से पैसे की हर माँग की पुष्टि फ़ोन पर या मिलकर करें। ई-मेल साइबर सुरक्षा प्रकोष्ठ को भेजें।"}},
+{ch:"call",av:"R",from:{en:"Voice sounds exactly like your nephew Rahul",hi:"आवाज़ बिल्कुल आपके भतीजे राहुल जैसी"},sub:{en:"Incoming call · new number",hi:"इनकमिंग कॉल · नया नंबर"},
+ body:{en:"“Chachaji, I have had an accident and the police have caught me. Please send ₹50,000 to this UPI immediately. Don't tell Mummy-Papa. My phone battery is dying!”",
+       hi:"“चाचाजी, मेरा एक्सीडेंट हो गया है और पुलिस ने पकड़ लिया है। तुरंत इस UPI पर ₹50,000 भेज दीजिए। मम्मी-पापा को मत बताना। मेरे फ़ोन की बैटरी खत्म हो रही है!”"},
+ ans:"scam",
+ flags:{en:["Emergency combined with secrecy","New number and money to an unknown UPI ID","AI can clone a voice from a few seconds of audio"],
+        hi:["आपातकाल के साथ गोपनीयता","नया नंबर और अज्ञात UPI आईडी पर पैसा","AI कुछ सेकंड की आवाज़ से हूबहू नकल बना सकता है"]},
+ tip:{en:"Hang up and call the person back on the number you already have. Agree on a family code word for emergencies.",
+      hi:"कॉल काटें और उस व्यक्ति को उसके पुराने नंबर पर वापस कॉल करें। आपात स्थिति के लिए परिवार में एक कोड-शब्द तय करें।"}},
+{ch:"call",av:"BK",from:{en:"“Bank Head Office – Rewards Desk”",hi:"“बैंक प्रधान कार्यालय – रिवॉर्ड डेस्क”"},sub:{en:"Incoming call",hi:"इनकमिंग कॉल"},
+ body:{en:"“Sir, your credit card reward points worth ₹7,800 expire today. I have sent an OTP to transfer them to your account. Please read out the 6-digit number.”",
+       hi:"“सर, आपके क्रेडिट कार्ड के ₹7,800 के रिवॉर्ड पॉइंट आज समाप्त हो रहे हैं। इन्हें आपके खाते में डालने के लिए OTP भेजा है। कृपया 6 अंकों का नंबर बता दीजिए।”"},
+ ans:"scam",
+ flags:{en:["Bank staff never ask for your OTP","Greed plus a deadline: points “expire today”","An OTP is meant only for you"],
+        hi:["बैंक कर्मचारी कभी OTP नहीं माँगते","लालच और समय-सीमा: पॉइंट “आज समाप्त”","OTP केवल आपके लिए होता है"]},
+ tip:{en:"An OTP is your signature: sharing it approves a payment. Disconnect and report the number on Sanchar Saathi (Chakshu).",
+      hi:"OTP आपका हस्ताक्षर है: इसे बताने से भुगतान मंज़ूर हो जाता है। कॉल काटें और नंबर की शिकायत संचार साथी (चक्षु) पर करें।"}},
+{ch:"wa",av:"VIP",from:{en:"Group: VIP Stock Market Club 2026",hi:"ग्रुप: VIP स्टॉक मार्केट क्लब 2026"},sub:{en:"You were added by an unknown number",hi:"अज्ञात नंबर ने आपको जोड़ा"},
+ body:{en:"Our SEBI-registered expert gives 300% return in 1 month 📈 Download our trading app from this link for guaranteed IPO allotment. Only 20 seats left!",
+       hi:"हमारे SEBI-पंजीकृत विशेषज्ञ 1 महीने में 300% रिटर्न दिलाते हैं 📈 पक्के IPO आवंटन के लिए इस लिंक से हमारा ट्रेडिंग ऐप डाउनलोड करें। केवल 20 सीटें बाकी!"},
+ ans:"scam",
+ flags:{en:["Guaranteed huge returns","A trading app from a link, not a registered broker","Pressure: “only 20 seats left”"],
+        hi:["भारी और पक्के रिटर्न का वादा","पंजीकृत ब्रोकर नहीं, लिंक से ट्रेडिंग ऐप","दबाव: “केवल 20 सीटें बाकी”"]},
+ tip:{en:"Invest only through SEBI-registered brokers and official app stores. Fake apps show big profits but never let you withdraw.",
+      hi:"निवेश केवल SEBI-पंजीकृत ब्रोकर और आधिकारिक ऐप स्टोर से करें। नकली ऐप बड़ा मुनाफ़ा दिखाते हैं पर पैसा कभी निकालने नहीं देते।"}},
+{ch:"wa",av:"KS",from:{en:"Group: Kisan Sahayata",hi:"ग्रुप: किसान सहायता"},sub:{en:"Forwarded many times",hi:"कई बार फ़ॉरवर्ड किया गया"},
+ body:{en:"PM-Kisan next installment of ₹2,000 released! Check your status and get the money now. Install this app:",
+       hi:"पीएम-किसान की अगली किस्त ₹2,000 जारी! अभी अपना स्टेटस देखें और पैसा पाएँ। यह ऐप इंस्टॉल करें:"},
+ att:{name:"PM_Kisan_Status.apk",size:"5.8 MB",ext:"APK"},ans:"scam",
+ flags:{en:["An .apk file instead of the official website","A forwarded message in a group","Government payments never need an app from WhatsApp"],
+        hi:["आधिकारिक वेबसाइट की जगह .apk फ़ाइल","ग्रुप में फ़ॉरवर्ड किया गया संदेश","सरकारी भुगतान के लिए व्हाट्सऐप से ऐप की ज़रूरत नहीं होती"]},
+ tip:{en:"Check scheme status only on pmkisan.gov.in or at a Common Service Centre. Share this warning with the farmers you work with.",
+      hi:"योजना का स्टेटस केवल pmkisan.gov.in या कॉमन सर्विस सेंटर पर देखें। यह चेतावनी अपने संपर्क के किसानों तक पहुँचाएँ।"}},
+{ch:"sms",av:"70",from:{en:"+91 70xxxxxx56",hi:"+91 70xxxxxx56"},sub:{en:"Text message",hi:"एसएमएस"},
+ body:{en:"Traffic e-Challan of Rs.500 is pending against your vehicle HR05XX1234. Pay today to avoid court action: http://echallan-pay.co/hr",
+       hi:"आपके वाहन HR05XX1234 पर ₹500 का ट्रैफ़िक ई-चालान बकाया है। कोर्ट कार्रवाई से बचने के लिए आज ही भुगतान करें: http://echallan-pay.co/hr"},
+ ans:"scam",
+ flags:{en:["The link is not echallan.parivahan.gov.in","Fear of court action","Sent from an ordinary mobile number"],
+        hi:["लिंक echallan.parivahan.gov.in नहीं है","कोर्ट कार्रवाई का डर","साधारण मोबाइल नंबर से भेजा गया"]},
+ tip:{en:"Check challans only on echallan.parivahan.gov.in or the official Parivahan app.",
+      hi:"चालान केवल echallan.parivahan.gov.in या आधिकारिक परिवहन ऐप पर जाँचें।"}},
+{ch:"call",av:"?",from:{en:"Unknown video call at 11:40 PM",hi:"रात 11:40 बजे अज्ञात वीडियो कॉल"},sub:{en:"WhatsApp video call",hi:"व्हाट्सऐप वीडियो कॉल"},
+ body:{en:"A stranger video-calls you and the screen shows an obscene video. Minutes later you receive a morphed clip of yourself: “Pay ₹20,000 or we send this to all your contacts.”",
+       hi:"एक अजनबी वीडियो कॉल करता है और स्क्रीन पर अश्लील वीडियो चलता है। कुछ मिनट बाद आपकी छेड़छाड़ की हुई क्लिप आती है: “₹20,000 दो वरना यह तुम्हारे सभी संपर्कों को भेज देंगे।”"},
+ ans:"scam",
+ flags:{en:["Unknown video call late at night","The call is recorded and the video morphed","Blackmail for money"],
+        hi:["देर रात अज्ञात वीडियो कॉल","कॉल रिकॉर्ड करके वीडियो से छेड़छाड़","पैसों के लिए ब्लैकमेल"]},
+ tip:{en:"Don't answer unknown video calls. If it happens: don't pay, because they will keep asking. Block the number, keep screenshots, and report on cybercrime.gov.in or 1930.",
+      hi:"अज्ञात वीडियो कॉल न उठाएँ। ऐसा हो जाए तो पैसे न दें, क्योंकि वे बार-बार माँगेंगे। नंबर ब्लॉक करें, स्क्रीनशॉट रखें और cybercrime.gov.in या 1930 पर शिकायत करें।"}}
+];
+
+const L=[
+{q:{en:"You want to check your income tax refund.",hi:"आप अपना आयकर रिफ़ंड देखना चाहते हैं।"},o:["incometax.gov.in.refund-claim.com","incometax.gov.in","incometax-refund.in"],a:1},
+{q:{en:"You want to report a cyber fraud.",hi:"आप साइबर ठगी की शिकायत करना चाहते हैं।"},o:["cybercrime-gov.in","cyber-crime.gov.co","cybercrime.gov.in"],a:2},
+{q:{en:"You received a traffic challan SMS.",hi:"आपको ट्रैफ़िक चालान का SMS मिला है।"},o:["echallan.parivahan.gov.in","echallan-parivahan.in","parivahan.gov.in.challan-pay.top"],a:0},
+{q:{en:"A farmer asks where to check PM-Kisan status.",hi:"एक किसान पूछता है कि पीएम-किसान स्टेटस कहाँ देखें।"},o:["pmkisan-gov.online","pmkisan.gov.in","pm-kisan.gov.in.status-check.xyz"],a:1},
+{q:{en:"You want to see how many SIM cards are issued in your name.",hi:"आप देखना चाहते हैं कि आपके नाम पर कितने सिम जारी हैं।"},o:["sanchar-saathi.co.in","sancharsaathi.gov.in.verify-kyc.xyz","sancharsaathi.gov.in"],a:2},
+{q:{en:"An e-mail asks you to log in to the NDRI website.",hi:"एक ई-मेल आपसे एनडीआरआई वेबसाइट पर लॉगिन करने को कहता है।"},o:["ndri.res.in","ndri.res.in.login-update.com","ndri-res.in"],a:0}
+];
+
+const C={
+en:["My phone has a screen lock (PIN, pattern or fingerprint)","WhatsApp two-step verification is on","“Install unknown apps” is switched off","My phone and apps were updated in the last month","I use different passwords for e-mail and banking","Multi-factor authentication is on for my e-mail","I never share OTP, PIN or CVV with anyone","My UPI daily limit is set to what I actually need","I have checked SIM cards issued in my name on Sanchar Saathi","I back up important photos and files","I know 1930 is the cyber fraud helpline"],
+hi:["मेरे फ़ोन में स्क्रीन लॉक (PIN, पैटर्न या फ़िंगरप्रिंट) है","व्हाट्सऐप टू-स्टेप वेरिफ़िकेशन चालू है","“अज्ञात ऐप्स इंस्टॉल करें” बंद है","पिछले महीने में मेरा फ़ोन और ऐप्स अपडेट हुए हैं","ई-मेल और बैंकिंग के लिए मेरे पासवर्ड अलग-अलग हैं","मेरे ई-मेल पर मल्टी-फ़ैक्टर ऑथेंटिकेशन चालू है","मैं OTP, PIN या CVV कभी किसी से साझा नहीं करता/करती","मेरी UPI दैनिक सीमा मेरी ज़रूरत के अनुसार तय है","मैंने संचार साथी पर अपने नाम के सिम कार्ड जाँच लिए हैं","मैं ज़रूरी फ़ोटो और फ़ाइलों का बैकअप रखता/रखती हूँ","मुझे पता है कि 1930 साइबर ठगी हेल्पलाइन है"]};
+
+const H={
+en:["<b>Call 1930 immediately.</b> Reporting in the first hour gives the best chance of freezing the money.","<b>Register a complaint on <a href=\"https://cybercrime.gov.in\" target=\"_blank\" rel=\"noopener\">cybercrime.gov.in</a></b> with the transaction ID and screenshots.","<b>Call your bank</b> and block your card, UPI and net banking.","<b>Change passwords</b> and log out of all other devices.","<b>Report fraud calls and SMS</b> on Chakshu, and block a lost phone, at <a href=\"https://sancharsaathi.gov.in\" target=\"_blank\" rel=\"noopener\">sancharsaathi.gov.in</a>.","<b>Inform the NDRI Cyber Security Cell</b> if an office account or device is involved."],
+hi:["<b>तुरंत 1930 पर कॉल करें।</b> पहले घंटे में सूचना देने से पैसा रुकवाने की सबसे अधिक संभावना होती है।","<b><a href=\"https://cybercrime.gov.in\" target=\"_blank\" rel=\"noopener\">cybercrime.gov.in</a> पर शिकायत दर्ज करें</b>, ट्रांज़ैक्शन आईडी और स्क्रीनशॉट के साथ।","<b>अपने बैंक को कॉल करें</b> और कार्ड, UPI व नेट बैंकिंग ब्लॉक करवाएँ।","<b>पासवर्ड बदलें</b> और बाकी सभी डिवाइस से लॉग आउट करें।","<b>ठगी वाले कॉल और SMS की शिकायत</b> चक्षु पर करें और खोया फ़ोन ब्लॉक करें: <a href=\"https://sancharsaathi.gov.in\" target=\"_blank\" rel=\"noopener\">sancharsaathi.gov.in</a>।","<b>रा.डे.अनु.सं. साइबर सुरक्षा प्रकोष्ठ को सूचित करें</b> यदि कार्यालय का खाता या उपकरण शामिल है।"]};
+const R={
+en:["Never share OTP, PIN, CVV or passwords, with anyone, ever.","You never enter a PIN or scan a QR to receive money.","Never install .apk files from WhatsApp, SMS or links.","Pause on urgency, fear or secrecy, and verify by calling back.","Police, CBI and banks never demand money on calls. There is no “digital arrest”."],
+hi:["OTP, PIN, CVV या पासवर्ड कभी किसी को न बताएँ।","पैसा प्राप्त करने के लिए कभी PIN डालना या QR स्कैन नहीं करना पड़ता।","व्हाट्सऐप, SMS या लिंक से आई .apk फ़ाइल कभी इंस्टॉल न करें।","जल्दबाज़ी, डर या गोपनीयता दिखे तो रुकें और वापस कॉल करके पुष्टि करें।","पुलिस, सीबीआई या बैंक कॉल पर पैसे नहीं माँगते। “डिजिटल अरेस्ट” जैसा कुछ नहीं होता।"]};
+
+let lang="en";
+try{const s=localStorage.getItem("cs-lang");if(s==="hi"||s==="en")lang=s}catch(e){}
+const $=id=>document.getElementById(id);
+const t=k=>T[lang][k];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- Spot the scam ---------- */
+let qi=0,qs=0,qAnswered=false,qDone=false;
+function renderQ(){
+  $("q-pos").textContent=qDone?"":`${Math.min(qi+1,Q.length)} ${t("of")} ${Q.length}`;
+  $("q-score").textContent=`${t("score")}: ${qs}`;
+  $("q-bar").style.width=((qDone?Q.length:qi)/Q.length*100)+"%";
+  const nx=$("q-next");
+  if(qDone){
+    $("q-choices").hidden=true;
+    const pct=qs/Q.length;
+    const msg=pct>=.85?t("resultHi"):pct>=.6?t("resultMid"):t("resultLo");
+    $("q-card").innerHTML=`<div class="card" style="text-align:center"><div class="lbl">${t("resultHead")}</div><div class="big">${qs}<span style="font-size:1.2rem;color:var(--muted)">/${Q.length}</span></div><p style="margin:8px 0 0">${msg}</p></div>`;
+    $("q-verdict").innerHTML="";nx.hidden=false;nx.textContent=t("restart");return;
+  }
+  const q=Q[qi];
+  let hd,bd;
+  const body=`<div class="bubble">${esc(q.body[lang])}${q.att?`<div class="att"><span class="ext">${q.att.ext}</span><span>${esc(q.att.name)} · ${q.att.size}</span></div>`:""}</div>`;
+  if(q.ch==="mail"){
+    hd=`<div class="hd"><div><span class="lbl">From</span> <b>${esc(q.from[lang])}</b></div><div class="lbl">${esc(q.sub[lang])}</div><div><b>${esc(q.subject[lang])}</b></div></div>`;
+  }else{
+    hd=`<div class="hd"><div class="av">${esc(q.av)}</div><div class="who"><b>${esc(q.from[lang])}</b><span>${esc(q.sub[lang])}</span></div></div>`;
+  }
+  bd=`<div class="bd">${body}</div>`;
+  const extra=q.ch==="call"?`<div class="callbtns" aria-hidden="true"><span class="r"></span><span class="g"></span></div>`:"";
+  $("q-card").innerHTML=`<article class="msg ${q.ch}">${hd}${bd}${extra}</article>`;
+  $("q-choices").hidden=false;
+  $("b-scam").disabled=qAnswered;$("b-safe").disabled=qAnswered;
+  if(qAnswered)showVerdict(); else $("q-verdict").innerHTML="";
+  nx.hidden=!qAnswered;nx.textContent=qi===Q.length-1?t("finish"):t("next");
+}
+let lastPick=null;
+function showVerdict(){
+  const q=Q[qi],ok=lastPick===q.ans;
+  $("q-verdict").innerHTML=`<div class="verdict ${ok?"ok":"no"}"><h3>${ok?t("correct"):t("wrong")} ${t("itWas")} <span class="tag ${q.ans}">${q.ans==="scam"?t("scamW"):t("safeW")}</span></h3>
+  <b>${q.ans==="scam"?t("flagsScam"):t("flagsSafe")}</b><ul>${q.flags[lang].map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
+  <b>${t("doThis")}</b><p>${esc(q.tip[lang])}</p></div>`;
+}
+function pick(a){if(qAnswered)return;qAnswered=true;lastPick=a;if(a===Q[qi].ans)qs++;renderQ();$("q-verdict").scrollIntoView({behavior:"smooth",block:"nearest"})}
+$("b-scam").onclick=()=>pick("scam");$("b-safe").onclick=()=>pick("safe");
+$("q-next").onclick=()=>{
+  if(qDone){qi=0;qs=0;qDone=false;qAnswered=false;}
+  else if(qi===Q.length-1){qDone=true;}
+  else{qi++;qAnswered=false;}
+  renderQ();window.scrollTo({top:0,behavior:"smooth"});
+};
+
+/* ---------- Link detective ---------- */
+let li=0,ls=0,lPick=null,lDone=false;
+function renderL(){
+  $("l-pos").textContent=lDone?"":`${li+1} ${t("of")} ${L.length}`;
+  $("l-score").textContent=`${t("score")}: ${ls}`;
+  $("l-bar").style.width=((lDone?L.length:li)/L.length*100)+"%";
+  const nx=$("l-next");
+  if(lDone){
+    $("l-q").textContent=`${t("resultHead")} ${ls}/${L.length}`;
+    $("l-opts").innerHTML="";$("l-verdict").innerHTML="";nx.hidden=false;nx.textContent=t("restart");return;
+  }
+  const r=L[li];$("l-q").textContent=r.q[lang];
+  $("l-opts").innerHTML=r.o.map((o,i)=>{let c="opt";if(lPick!==null){if(i===r.a)c+=" right";else if(i===lPick)c+=" wrong";}
+    return `<button type="button" class="${c}" data-i="${i}" ${lPick!==null?"disabled":""}>https://${esc(o)}/</button>`}).join("");
+  $("l-opts").querySelectorAll("button").forEach(b=>b.onclick=()=>{lPick=+b.dataset.i;if(lPick===r.a)ls++;renderL()});
+  $("l-verdict").innerHTML=lPick===null?"":`<div class="verdict ${lPick===r.a?"ok":"no"}"><p>${lPick===r.a?t("linkRight"):t("linkWrong")}</p></div>`;
+  nx.hidden=lPick===null;nx.textContent=li===L.length-1?t("finish"):t("next");
+}
+$("l-next").onclick=()=>{if(lDone){li=0;ls=0;lDone=false;lPick=null}else if(li===L.length-1){lDone=true}else{li++;lPick=null}renderL()};
+
+/* ---------- Password ---------- */
+const COMMON=["password","passw","123","qwerty","ndri","icar","india","karnal","admin","welcome","abc","iloveyou","krishna","ganesh","sairam","love"];
+function evalPw(p){
+  let pool=0;if(/[a-z]/.test(p))pool+=26;if(/[A-Z]/.test(p))pool+=26;if(/\d/.test(p))pool+=10;if(/[^A-Za-z0-9]/.test(p))pool+=33;
+  let bits=p.length?p.length*Math.log2(Math.max(pool,1)):0;
+  const low=p.toLowerCase();const common=COMMON.some(w=>low.includes(w))||/(19|20)\d\d/.test(p);
+  const rep=/(.)\1\1/.test(p)||/(0123|1234|2345|3456|4567|5678|6789|abcd|qwer|asdf)/i.test(p);
+  if(common)bits-=22;if(rep)bits-=12;bits=Math.max(0,bits);
+  const lvl=bits<28?0:bits<40?1:bits<60?2:bits<80?3:4;
+  const tips=[];if(p.length<12)tips.push(t("tipLen"));if(pool<60)tips.push(t("tipMix"));if(common)tips.push(t("tipCommon"));if(rep)tips.push(t("tipRepeat"));if(!tips.length)tips.push(t("tipGood"));
+  return{lvl,tips};
+}
+function renderPw(){
+  const p=$("pw").value,{lvl,tips}=evalPw(p);
+  const labels=["pwVeryWeak","pwWeak","pwFair","pwStrong","pwVeryStrong"],times=["pwT0","pwT1","pwT2","pwT3","pwT4"];
+  const cols=["var(--scam)","var(--scam)","var(--saffron)","var(--safe)","var(--safe)"];
+  $("pw-bar").style.width=p?((lvl+1)*20)+"%":"0";$("pw-bar").style.background=cols[lvl];
+  $("pw-label").textContent=p?t(labels[lvl]):"";$("pw-label").style.color=cols[lvl];
+  $("pw-time").textContent=p?"· "+t(times[lvl]):"";
+  $("pw-tips").innerHTML=p?tips.map(x=>`<li>${esc(x)}</li>`).join(""):"";
+}
+$("pw").addEventListener("input",renderPw);
+
+/* ---------- Check-up ---------- */
+const cState=new Array(C.en.length).fill(false);
+function renderC(){
+  $("c-total").textContent=C.en.length;
+  $("c-list").innerHTML=C[lang].map((x,i)=>`<label class="check" for="c${i}"><input type="checkbox" id="c${i}" ${cState[i]?"checked":""}><span>${esc(x)}</span></label>`).join("");
+  $("c-list").querySelectorAll("input").forEach((el,i)=>el.onchange=()=>{cState[i]=el.checked;scoreC()});
+  scoreC();
+}
+function scoreC(){const n=cState.filter(Boolean).length;$("c-score").textContent=n;const r=n/C.en.length;$("c-msg").textContent=r>=.9?t("cHi"):r>=.55?t("cMid"):t("cLo")}
+
+/* ---------- Help ---------- */
+function renderH(){$("h-steps").innerHTML=H[lang].map(x=>`<li><span>${x}</span></li>`).join("");$("h-rules").innerHTML=R[lang].map(x=>`<li><span>${esc(x)}</span></li>`).join("")}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-copy]");if(!b)return;const v=b.dataset.copy;
+  const done=()=>{b.textContent=t("copied");setTimeout(()=>b.textContent=t("copy"),1500)};
+  try{navigator.clipboard.writeText(v).then(done,()=>{})}catch(err){}});
+$("pledge-btn").onclick=()=>{$("pledge-done").hidden=false;$("pledge-btn").disabled=true};
+
+/* ---------- Tabs & language ---------- */
+document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("[data-tab]").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));
+  document.querySelectorAll("[data-panel]").forEach(p=>p.hidden=p.id!==b.dataset.tab);
+  window.scrollTo({top:0});
+});
+function applyLang(){
+  document.documentElement.lang=lang==="hi"?"hi":"en";
+  $("lang-en").setAttribute("aria-pressed",lang==="en");$("lang-hi").setAttribute("aria-pressed",lang==="hi");
+  document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
+  renderQ();renderL();renderPw();renderC();renderH();
+}
+$("lang-en").onclick=()=>{lang="en";try{localStorage.setItem("cs-lang",lang)}catch(e){}applyLang()};
+$("lang-hi").onclick=()=>{lang="hi";try{localStorage.setItem("cs-lang",lang)}catch(e){}applyLang()};
+applyLang();
+</script>
