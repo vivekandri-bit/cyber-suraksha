@@ -1,4 +1,5 @@
 <title>Cyber Suraksha Challenge</title>
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Mukta:wght@400;500;700&display=swap">
 <style>
@@ -99,6 +100,15 @@ h2{font-family:var(--f-display);font-size:1.2rem;margin:0 0 8px;text-wrap:balanc
 .verdict h3{margin:0 0 6px;font-family:var(--f-display);font-size:1.1rem}
 .verdict ul{margin:6px 0 8px;padding-left:20px}
 .verdict p{margin:0}
+.vbox{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--call);margin-top:10px}
+.vbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vplay{position:absolute;inset:0;width:100%;height:100%;border:0;padding:0;background:var(--call);color:#fff;display:grid;place-items:center}
+.vplay img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.85}
+.vplay .pbtn{position:relative;width:64px;height:46px;border-radius:12px;background:#D93A3A;display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.35)}
+.vplay .pbtn::after{content:"";border-left:18px solid #fff;border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:4px}
+.vplay .vlbl{position:absolute;left:10px;bottom:8px;background:rgba(0,0,0,.6);padding:2px 8px;border-radius:8px;font-size:.8rem}
+.vlink{display:block;margin-top:8px;font-size:.88rem;font-weight:700;overflow-wrap:anywhere;color:var(--saffron);text-decoration:underline}
+.vlist{display:flex;flex-direction:column;gap:14px}
 .tag{font-weight:700}
 .tag.scam{color:var(--scam)}.tag.safe{color:var(--safe)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px}
@@ -237,6 +247,11 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surfa
       <div class="contact"><span data-t="email"></span>: <b>Vivek.kumar3@icar.org.in</b> <button class="copy" type="button" data-copy="Vivek.kumar3@icar.org.in" data-t="copy"></button></div>
     </div>
     <div class="card">
+      <h2 data-t="videosHead"></h2>
+      <p class="lede" style="margin:0 0 6px" data-t="videosLede"></p>
+      <div class="vlist" id="h-videos"></div>
+    </div>
+    <div class="card">
       <h2 data-t="quickHead"></h2>
       <div id="h-quick" class="panel" style="gap:8px"></div>
     </div>
@@ -286,7 +301,7 @@ en:{appName:"Cyber Suraksha Challenge",appName1:"Cyber Suraksha",appName2:"Chall
  act5:"Activity 5",helpTitle:"Cheated? Act in the golden hour",helpLede:"The faster you report, the better the chance of freezing the money.",
  hotLbl:"National Cyber Fraud Helpline",copy:"Copy",copied:"Copied",
  ndriHead:"NDRI Cyber Security Cell",phone:"Phone",email:"E-mail",
- rulesHead:"Golden rules",pickTheme:"Choose a theme",quickHead:"Quick checks on your phone",pledgeHead:"Cyber Hygiene Pledge",
+ rulesHead:"Golden rules",pickTheme:"Choose a theme",quickHead:"Quick checks on your phone",watchVideo:"Watch the video on this fraud",videosHead:"Awareness videos",videosLede:"Tap a video to play it on this screen, or use the YouTube link below it.",videoN:"Video",openYT:"Watch on YouTube",playHere:"Tap to play here",pledgeHead:"Cyber Hygiene Pledge",
  pledgeText:"I will use strong passwords and MFA, keep my devices updated, never share OTP or PIN, think before I click, and report every cyber incident promptly. I will help build a culture of cyber hygiene at home and at work.",
  pledgeBtn:"I take the pledge",pledgeDone:"Thank you! Show this screen to the facilitator. #CyberHygieneOurCulture",
  foot:"Awareness activity by the Cyber Security Cell, ICAR-NDRI Karnal. Messages shown are training examples."},
@@ -310,7 +325,7 @@ hi:{appName:"साइबर सुरक्षा चैलेंज",appName1:
  act5:"गतिविधि 5",helpTitle:"ठगी हुई? गोल्डन ऑवर में कार्रवाई करें",helpLede:"जितनी जल्दी सूचना देंगे, पैसा रुकवाने की संभावना उतनी अधिक होगी।",
  hotLbl:"राष्ट्रीय साइबर धोखाधड़ी हेल्पलाइन",copy:"कॉपी",copied:"कॉपी हुआ",
  ndriHead:"रा.डे.अनु.सं. साइबर सुरक्षा प्रकोष्ठ",phone:"फ़ोन",email:"ई-मेल",
- rulesHead:"सुनहरे नियम",pickTheme:"विषय चुनें",quickHead:"फ़ोन पर त्वरित जाँच",pledgeHead:"साइबर स्वच्छता शपथ",
+ rulesHead:"सुनहरे नियम",pickTheme:"विषय चुनें",quickHead:"फ़ोन पर त्वरित जाँच",watchVideo:"इस ठगी पर वीडियो देखें",videosHead:"जागरूकता वीडियो",videosLede:"वीडियो इसी स्क्रीन पर चलाने के लिए उस पर टैप करें, या नीचे दिए यूट्यूब लिंक का प्रयोग करें।",videoN:"वीडियो",openYT:"यूट्यूब पर देखें",playHere:"यहीं चलाने के लिए टैप करें",pledgeHead:"साइबर स्वच्छता शपथ",
  pledgeText:"मैं मज़बूत पासवर्ड और MFA का प्रयोग करूँगा/करूँगी, अपने उपकरण अपडेट रखूँगा/रखूँगी, OTP या PIN कभी साझा नहीं करूँगा/करूँगी, क्लिक करने से पहले सोचूँगा/सोचूँगी और हर साइबर घटना की तुरंत सूचना दूँगा/दूँगी। मैं घर और कार्यस्थल पर साइबर स्वच्छता की संस्कृति बनाने में सहयोग करूँगा/करूँगी।",
  pledgeBtn:"मैं शपथ लेता/लेती हूँ",pledgeDone:"धन्यवाद! यह स्क्रीन प्रशिक्षक को दिखाएँ। #CyberHygieneOurCulture",
  foot:"साइबर सुरक्षा प्रकोष्ठ, भा.कृ.अनु.प.-रा.डे.अनु.सं. करनाल द्वारा जागरूकता गतिविधि। दिखाए गए संदेश प्रशिक्षण उदाहरण हैं।"}
@@ -589,7 +604,7 @@ function showVerdict(){
   const q=Q[qi],ok=lastPick===q.ans;
   $("q-verdict").innerHTML=`<div class="verdict ${ok?"ok":"no"}"><h3>${ok?t("correct"):t("wrong")} ${t("itWas")} <span class="tag ${q.ans}">${q.ans==="scam"?t("scamW"):t("safeW")}</span></h3>
   <b>${q.ans==="scam"?t("flagsScam"):t("flagsSafe")}</b><ul>${q.flags[lang].map(f=>`<li>${esc(f)}</li>`).join("")}</ul>
-  <b>${t("doThis")}</b><p>${esc(q.tip[lang])}</p></div>`;
+  <b>${t("doThis")}</b><p>${esc(q.tip[lang])}</p>${q.vid!==undefined?`<div style="margin-top:10px"><b>${t("watchVideo")}</b>${vidHTML(q.vid)}</div>`:""}</div>`;
 }
 function pick(a){if(qAnswered)return;qAnswered=true;lastPick=a;if(a===Q[qi].ans)qs++;renderQ();$("q-verdict").scrollIntoView({behavior:"smooth",block:"nearest"})}
 $("b-scam").onclick=()=>pick("scam");$("b-safe").onclick=()=>pick("safe");
@@ -599,6 +614,20 @@ $("q-next").onclick=()=>{
   else{qi++;qAnswered=false;}
   renderQ();window.scrollTo({top:0,behavior:"smooth"});
 };
+
+
+/* ---------- Videos ---------- */
+const VIDS=["LkQt5CrfZEg","xcI-j9GWT9E","aMY7vS5BCFQ","7XpFCbjdnpg","8m27TrEZ76A"];
+// Question number (as numbered in "All", 1–24)  →  video number (1–5). Example: {4:1} attaches Video 1 to question 4.
+const VIDMAP={};
+ALLQ.forEach((q,k)=>{q.no=k+1;if(VIDMAP[q.no])q.vid=VIDMAP[q.no]-1;});
+function vidURL(id){return "https://www.youtube.com/watch?v="+id;}
+function vidHTML(i){const id=VIDS[i];return `<div class="vbox"><button type="button" class="vplay" data-play="${id}" aria-label="${t("playHere")} – ${t("videoN")} ${i+1}"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy" onerror="this.remove()"><span class="pbtn"></span><span class="vlbl">${t("videoN")} ${i+1} · ${t("playHere")}</span></button></div><a class="vlink" href="${vidURL(id)}" target="_blank" rel="noopener noreferrer">▶ ${t("openYT")}: ${vidURL(id)}</a>`;}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-play]");if(!b)return;const id=b.dataset.play;
+  document.querySelectorAll(".vbox iframe").forEach(f=>{const i=VIDS.indexOf(f.dataset.vid);f.parentElement.outerHTML=vidHTML(i).split('<a class="vlink"')[0];});
+  const box=b.parentElement;const origin=encodeURIComponent(location.origin&&location.origin!=="null"?location.origin:"");
+  box.innerHTML=`<iframe data-vid="${id}" src="https://www.youtube.com/embed/${id}?autoplay=1&playsinline=1&rel=0${origin?"&origin="+origin:""}" title="${t("videoN")}" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen></iframe>`;});
+function renderV(){$("h-videos").innerHTML=VIDS.map((_,i)=>`<div>${vidHTML(i)}</div>`).join("");}
 
 /* ---------- Link detective ---------- */
 let li=0,ls=0,lPick=null,lDone=false;
@@ -670,7 +699,7 @@ function applyLang(){
   document.documentElement.lang=lang==="hi"?"hi":"en";
   $("lang-en").setAttribute("aria-pressed",lang==="en");$("lang-hi").setAttribute("aria-pressed",lang==="hi");
   document.querySelectorAll("[data-t]").forEach(el=>el.textContent=t(el.dataset.t));
-  renderCats();renderQ();renderL();renderPw();renderC();renderH();
+  renderCats();renderQ();renderL();renderPw();renderC();renderH();renderV();
 }
 $("lang-en").onclick=()=>{lang="en";try{localStorage.setItem("cs-lang",lang)}catch(e){}applyLang()};
 $("lang-hi").onclick=()=>{lang="hi";try{localStorage.setItem("cs-lang",lang)}catch(e){}applyLang()};
